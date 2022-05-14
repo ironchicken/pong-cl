@@ -46,7 +46,20 @@
 
     (setf *ticks-count* ticks)))
 
+(defvar *background* (sdl2:make-rect 0 0 *width* *height*))
+(defvar *top-wall* (sdl2:make-rect 0 0 *width* *thickness*))
+(defvar *bottom-wall* (sdl2:make-rect 0 (- *height* *thickness*) *width* *thickness*))
+(defvar *back-wall* (sdl2:make-rect (- *width* *thickness*) 0 *thickness* *height*))
+
 (defun render (renderer)
+  (sdl2:set-render-draw-color renderer 0 0 180 0)
+  (sdl2:render-fill-rect renderer *background*)
+
+  (sdl2:set-render-draw-color renderer 255 255 255 0)
+  (sdl2:render-fill-rect renderer *top-wall*)
+  (sdl2:render-fill-rect renderer *bottom-wall*)
+  (sdl2:render-fill-rect renderer *back-wall*)
+
   (sdl2:render-present renderer))
 
 (defun run-game ()
