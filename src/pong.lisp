@@ -44,12 +44,37 @@
     (when (> delta-time 0.05)
       (setf delta-time 0.05))
 
-    (setf *ticks-count* ticks)))
+    (setf *ticks-count* ticks)
+
+    (update-paddle delta-time)
+    (update-ball delta-time)))
+
+(defun update-paddle (delta-time)
+  (let* ((y (vec2-y (game-state-paddle-position *state*)))
+	 (vel (vec2-y (game-state-paddle-velocity *state*)))
+	 (delta-y (+ y (round (* vel delta-time)))))
+    (setf (vec2-y (game-state-paddle-position *state*)) delta-y)
+    (setf (sdl2:rect-y *paddle*) (- delta-y (/ *paddle-height* 2)))))
+
+(defun update-ball (delta-time)
+  (let* ((x (vec2-x (game-state-ball-position *state*)))
+	 (vel (vec2-x (game-state-ball-velocity *state*)))
+	 (delta-x (+ x (round (* vel delta-time)))))
+    (setf (vec2-x (game-state-ball-position *state*)) delta-x)
+    (setf (sdl2:rect-x *ball*) (- delta-x (/ *thickness* 2))))
+
+  (let* ((y (vec2-y (game-state-ball-position *state*)))
+	 (vel (vec2-y (game-state-ball-velocity *state*)))
+	 (delta-y (+ y (round (* vel delta-time)))))
+    (setf (vec2-y (game-state-ball-position *state*)) delta-y)
+    (setf (sdl2:rect-y *ball*) (- delta-y (/ *thickness* 2)))))
 
 (defvar *background* (sdl2:make-rect 0 0 *width* *height*))
 (defvar *top-wall* (sdl2:make-rect 0 0 *width* *thickness*))
 (defvar *bottom-wall* (sdl2:make-rect 0 (- *height* *thickness*) *width* *thickness*))
 (defvar *back-wall* (sdl2:make-rect (- *width* *thickness*) 0 *thickness* *height*))
+(defvar *paddle* (sdl2:make-rect 0 0 *thickness* *paddle-height*))
+(defvar *ball* (sdl2:make-rect 0 0 *thickness* *thickness*))
 
 (defun render (renderer)
   (sdl2:set-render-draw-color renderer 0 0 180 0)
@@ -59,11 +84,15 @@
   (sdl2:render-fill-rect renderer *top-wall*)
   (sdl2:render-fill-rect renderer *bottom-wall*)
   (sdl2:render-fill-rect renderer *back-wall*)
+  (sdl2:render-fill-rect renderer *paddle*)
+  (sdl2:render-fill-rect renderer *ball*)
 
   (sdl2:render-present renderer))
 
 (defun run-game ()
   (setf *ticks-count* 0)
+  (update-paddle 0)
+  (update-ball 0)
   (sdl2:with-init (:everything)
     (sdl2:with-window (win :title "Pong" :w *width* :h *height* :flags '(:shown))
       (sdl2:with-renderer (renderer win :flags '(:accelerated))
