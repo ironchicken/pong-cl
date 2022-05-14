@@ -5,6 +5,7 @@
 (defparameter *paddle-height* 128)
 (defparameter *width* 1024)
 (defparameter *height* 768)
+(defparameter *ticks-count* 0)
 
 (defstruct vec2
   x y)
@@ -26,10 +27,39 @@
    :paddle-position (make-vec2 :x *thickness* :y (/ *height* 2))
    :paddle-velocity (make-vec2 :x 0.0 :y 0.0)))
 
-(defun process-input ())
+(defvar *state* (initial-state))
 
-(defun update (game-state))
+(defun process-input (keysym)
+  (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-escape)
+    (sdl2:push-event :quit)))
 
-(defun render ())
+(defun update ()
+  (let* ((ticks (sdl2:get-ticks))
+	 (ticks-delta (- ticks *ticks-count*)))
+    (when (< ticks-delta *frame-rate*)
+      (sdl2:delay ticks-delta)))
 
-(defun run-game ())
+  (let* ((ticks (sdl2:get-ticks))
+	 (delta-time (/ (- ticks *ticks-count*) 1000.0)))
+    (when (> delta-time 0.05)
+      (setf delta-time 0.05))
+
+    (setf *ticks-count* ticks)))
+
+(defun render (renderer)
+  (sdl2:render-present renderer))
+
+(defun run-game ()
+  (setf *ticks-count* 0)
+  (sdl2:with-init (:everything)
+    (sdl2:with-window (win :title "Pong" :w *width* :h *height* :flags '(:shown))
+      (sdl2:with-renderer (renderer win :flags '(:accelerated))
+	(sdl2:with-event-loop (:method :poll)
+	  (:keyup
+	   (:keysym keysym)
+	   (process-input keysym))
+	  (:idle
+	   ()
+	   (update)
+	   (render renderer))
+	  (:quit () t))))))
