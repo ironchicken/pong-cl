@@ -6,6 +6,7 @@
 (defparameter *width* 1024)
 (defparameter *height* 768)
 (defparameter *ticks-count* 0)
+(defparameter *paddle-speed* 230.0)
 
 (defstruct vec2
   x y)
@@ -29,9 +30,20 @@
 
 (defvar *state* (initial-state))
 
-(defun process-input (keysym)
-  (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-escape)
-    (sdl2:push-event :quit)))
+(defun process-input (event-type keysym)
+  (case event-type
+    (:keyup
+     (cond ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-escape)
+	    (sdl2:push-event :quit))
+	   ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-w)
+	    (setf (vec2-y (game-state-paddle-velocity *state*)) 0))
+	   ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-s)
+	    (setf (vec2-y (game-state-paddle-velocity *state*)) 0))))
+    (:keydown
+     (cond ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-w)
+	    (setf (vec2-y (game-state-paddle-velocity *state*)) (* -1 *paddle-speed*)))
+	   ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-s)
+	    (setf (vec2-y (game-state-paddle-velocity *state*)) *paddle-speed*))))))
 
 (defun update ()
   (let* ((ticks (sdl2:get-ticks))
@@ -104,7 +116,10 @@
 	(sdl2:with-event-loop (:method :poll)
 	  (:keyup
 	   (:keysym keysym)
-	   (process-input keysym))
+	   (process-input :keyup keysym))
+	  (:keydown
+	   (:keysym keysym)
+	   (process-input :keydown keysym))
 	  (:idle
 	   ()
 	   (update)
