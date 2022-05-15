@@ -108,6 +108,7 @@
 
       (when (and (< x (+ (vec2-x (game-state-paddle-position *state*)) *thickness*))
 		 (< vel-x 0))
+	(incf (game-state-score *state*) 10)
 	(flip-ball-direction-x))))
 
   (let ((delta-pos (delta
