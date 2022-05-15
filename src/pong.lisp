@@ -111,7 +111,15 @@
 		 (< y (+ (vec2-y (game-state-paddle-position *state*)) (/ *paddle-height* 2)))
 		 (< vel-x 0))
 	(incf (game-state-score *state*) 10)
-	(flip-ball-direction-x))))
+	(flip-ball-direction-x))
+
+      (when (and (< x 0) (< vel-x 0))
+	(decf (game-state-score *state*) 50)
+	(when (< (game-state-score *state*) 0)
+	  (setf (game-state-score *state*) 0))
+	(setf (game-state-running-p *state*) nil)
+	(setf (game-state-ball-position *state*)
+	      (make-vec2 :x (/ *width* 2) :y (/ *height* 2))))))
 
   (let ((delta-pos (delta
 		    (game-state-ball-position *state*)
