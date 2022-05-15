@@ -21,7 +21,7 @@
 
 (defun initial-state ()
   (make-game-state
-   :running-p t
+   :running-p nil
    :score 0
    :ball-position (make-vec2 :x (/ *width* 2) :y (/ *height* 2))
    :ball-velocity (make-vec2 :x -200.0 :y 235.0)
@@ -35,6 +35,10 @@
     (:keyup
      (cond ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-escape)
 	    (sdl2:push-event :quit))
+	   ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-space)
+	    (if (game-state-running-p *state*)
+		(setf (game-state-running-p *state*) nil)
+		(setf (game-state-running-p *state*) t)))
 	   ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-w)
 	    (setf (vec2-y (game-state-paddle-velocity *state*)) 0))
 	   ((sdl2:scancode= (sdl2:scancode-value keysym) :scancode-s)
@@ -58,8 +62,9 @@
 
     (setf *ticks-count* ticks)
 
-    (update-paddle delta-time)
-    (update-ball delta-time)))
+    (when (game-state-running-p *state*)
+      (update-paddle delta-time)
+      (update-ball delta-time))))
 
 (defun delta (position velocity delta-time)
   (let ((delta-x
