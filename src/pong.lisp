@@ -85,23 +85,25 @@
 	(y (vec2-y (game-state-ball-position *state*)))
 	(vel-x (vec2-x (game-state-ball-velocity *state*)))
 	(vel-y (vec2-y (game-state-ball-velocity *state*))))
+    (flet ((flip-ball-direction-x ()
+	     (setf (vec2-x (game-state-ball-velocity *state*))
+		   (* -1 (vec2-x (game-state-ball-velocity *state*)))))
+	   (flip-ball-direction-y ()
+	     (setf (vec2-y (game-state-ball-velocity *state*))
+		   (* -1 vel-y))))
 
-    (when (and (< y *thickness*) (< vel-y 0))
-      (setf (vec2-y (game-state-ball-velocity *state*))
-	    (* -1 vel-y)))
+      (when (and (< y *thickness*) (< vel-y 0))
+	(flip-ball-direction-y))
 
-    (when (and (> y (- *height* *thickness*)) (> vel-y 0))
-      (setf (vec2-y (game-state-ball-velocity *state*))
-	    (* -1 vel-y)))
+      (when (and (> y (- *height* *thickness*)) (> vel-y 0))
+	(flip-ball-direction-y))
 
-    (when (and (> x (- *width* *thickness*)) (> vel-x 0))
-      (setf (vec2-x (game-state-ball-velocity *state*))
-	    (* -1 (vec2-x (game-state-ball-velocity *state*)))))
+      (when (and (> x (- *width* *thickness*)) (> vel-x 0))
+	(flip-ball-direction-x))
 
-    (when (and (< x (+ (vec2-x (game-state-paddle-position *state*)) *thickness*))
-	       (< vel-x 0))
-      (setf (vec2-x (game-state-ball-velocity *state*))
-	    (* -1 (vec2-x (game-state-ball-velocity *state*))))))
+      (when (and (< x (+ (vec2-x (game-state-paddle-position *state*)) *thickness*))
+		 (< vel-x 0))
+	(flip-ball-direction-x))))
 
   (let ((delta-pos (delta
 		    (game-state-ball-position *state*)
