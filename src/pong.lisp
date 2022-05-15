@@ -107,6 +107,8 @@
 	(flip-ball-direction-x))
 
       (when (and (< x (+ (vec2-x (game-state-paddle-position *state*)) *thickness*))
+		 (> y (- (vec2-y (game-state-paddle-position *state*)) (/ *paddle-height* 2)))
+		 (< y (+ (vec2-y (game-state-paddle-position *state*)) (/ *paddle-height* 2)))
 		 (< vel-x 0))
 	(incf (game-state-score *state*) 10)
 	(flip-ball-direction-x))))
