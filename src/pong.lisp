@@ -94,6 +94,10 @@
       (setf (vec2-y (game-state-ball-velocity *state*))
 	    (* -1 vel-y)))
 
+    (when (and (> x (- *width* *thickness*)) (> vel-x 0))
+      (setf (vec2-x (game-state-ball-velocity *state*))
+	    (* -1 (vec2-x (game-state-ball-velocity *state*)))))
+
     (when (and (< x (+ (vec2-x (game-state-paddle-position *state*)) *thickness*))
 	       (< vel-x 0))
       (setf (vec2-x (game-state-ball-velocity *state*))
