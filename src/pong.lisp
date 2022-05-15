@@ -49,25 +49,30 @@
     (update-paddle delta-time)
     (update-ball delta-time)))
 
+(defun delta (position velocity delta-time)
+  (let ((delta-x
+	  (+ (vec2-x position) (round (* (vec2-x velocity) delta-time))))
+	(delta-y
+	  (+ (vec2-y position) (round (* (vec2-y velocity) delta-time)))))
+    (make-vec2 :x delta-x :y delta-y)))
+
 (defun update-paddle (delta-time)
-  (let* ((y (vec2-y (game-state-paddle-position *state*)))
-	 (vel (vec2-y (game-state-paddle-velocity *state*)))
-	 (delta-y (+ y (round (* vel delta-time)))))
-    (setf (vec2-y (game-state-paddle-position *state*)) delta-y)
-    (setf (sdl2:rect-y *paddle*) (- delta-y (/ *paddle-height* 2)))))
+  (let* ((delta-pos
+	   (delta
+	    (game-state-paddle-position *state*)
+	    (game-state-paddle-velocity *state*)
+	    delta-time)))
+    (setf (game-state-paddle-position *state*) delta-pos)
+    (setf (sdl2:rect-y *paddle*) (- (vec2-y delta-pos) (/ *paddle-height* 2)))))
 
 (defun update-ball (delta-time)
-  (let* ((x (vec2-x (game-state-ball-position *state*)))
-	 (vel (vec2-x (game-state-ball-velocity *state*)))
-	 (delta-x (+ x (round (* vel delta-time)))))
-    (setf (vec2-x (game-state-ball-position *state*)) delta-x)
-    (setf (sdl2:rect-x *ball*) (- delta-x (/ *thickness* 2))))
-
-  (let* ((y (vec2-y (game-state-ball-position *state*)))
-	 (vel (vec2-y (game-state-ball-velocity *state*)))
-	 (delta-y (+ y (round (* vel delta-time)))))
-    (setf (vec2-y (game-state-ball-position *state*)) delta-y)
-    (setf (sdl2:rect-y *ball*) (- delta-y (/ *thickness* 2)))))
+  (let* ((delta-pos (delta
+		     (game-state-ball-position *state*)
+		     (game-state-ball-velocity *state*)
+		     delta-time)))
+    (setf (game-state-ball-position *state*) delta-pos)
+    (setf (sdl2:rect-x *ball*) (- (vec2-x delta-pos) (/ *thickness* 2)))
+    (setf (sdl2:rect-y *ball*) (- (vec2-y delta-pos) (/ *thickness* 2)))))
 
 (defvar *background* (sdl2:make-rect 0 0 *width* *height*))
 (defvar *top-wall* (sdl2:make-rect 0 0 *width* *thickness*))
