@@ -74,8 +74,11 @@
 	    (game-state-paddle-position *state*)
 	    (game-state-paddle-velocity *state*)
 	    delta-time)))
-    (setf (game-state-paddle-position *state*) delta-pos)
-    (setf (sdl2:rect-y *paddle*) (- (vec2-y delta-pos) (/ *paddle-height* 2)))))
+    (when (and
+	   (> (- (vec2-y delta-pos) (/ *paddle-height* 2)) *thickness*)
+	   (< (+ (vec2-y delta-pos) (/ *paddle-height* 2)) (- *height* *thickness*)))
+      (setf (game-state-paddle-position *state*) delta-pos)
+      (setf (sdl2:rect-y *paddle*) (- (vec2-y delta-pos) (/ *paddle-height* 2))))))
 
 (defun update-ball (delta-time)
   (let* ((delta-pos (delta
