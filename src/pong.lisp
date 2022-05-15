@@ -37,7 +37,7 @@
   (let* ((ticks (sdl2:get-ticks))
 	 (ticks-delta (- ticks *ticks-count*)))
     (when (< ticks-delta *frame-rate*)
-      (sdl2:delay ticks-delta)))
+      (sdl2:delay (- *frame-rate* ticks-delta))))
 
   (let* ((ticks (sdl2:get-ticks))
 	 (delta-time (/ (- ticks *ticks-count*) 1000.0)))
