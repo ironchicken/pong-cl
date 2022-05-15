@@ -73,7 +73,7 @@
 (defvar *top-wall* (sdl2:make-rect 0 0 *width* *thickness*))
 (defvar *bottom-wall* (sdl2:make-rect 0 (- *height* *thickness*) *width* *thickness*))
 (defvar *back-wall* (sdl2:make-rect (- *width* *thickness*) 0 *thickness* *height*))
-(defvar *paddle* (sdl2:make-rect 0 0 *thickness* *paddle-height*))
+(defvar *paddle* (sdl2:make-rect *thickness* 0 *thickness* *paddle-height*))
 (defvar *ball* (sdl2:make-rect 0 0 *thickness* *thickness*))
 
 (defun render (renderer)
