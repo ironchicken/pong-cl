@@ -14,6 +14,7 @@
 (defstruct game-state
   running-p
   score
+  next-points
   ball-position
   ball-velocity
   paddle-position
@@ -23,6 +24,7 @@
   (make-game-state
    :running-p nil
    :score 0
+   :next-points 10
    :ball-position (make-vec2 :x (/ *width* 2) :y (/ *height* 2))
    :ball-velocity (make-vec2 :x -200.0 :y 235.0)
    :paddle-position (make-vec2 :x *thickness* :y (/ *height* 2))
@@ -73,6 +75,11 @@
 	  (+ (vec2-y position) (round (* (vec2-y velocity) delta-time)))))
     (make-vec2 :x delta-x :y delta-y)))
 
+(defun speed-up (vec x y)
+  (let ((new-x (if (>= (vec2-x vec) 0) (+ (vec2-x vec) x) (- (vec2-x vec) x)))
+	(new-y (if (>= (vec2-y vec) 0) (+ (vec2-y vec) y) (- (vec2-y vec) y))))
+    (make-vec2 :x new-x :y new-y)))
+
 (defun update-paddle (delta-time)
   (let* ((delta-pos
 	   (delta
@@ -110,14 +117,21 @@
 		 (> y (- (vec2-y (game-state-paddle-position *state*)) (/ *paddle-height* 2)))
 		 (< y (+ (vec2-y (game-state-paddle-position *state*)) (/ *paddle-height* 2)))
 		 (< vel-x 0))
-	(incf (game-state-score *state*) 10)
-	(flip-ball-direction-x))
+	(incf (game-state-score *state*) (game-state-next-points *state*))
+	(incf (game-state-next-points *state*) 5)
+	(flip-ball-direction-x)
+	(setf (game-state-ball-velocity *state*)
+	      (speed-up (game-state-ball-velocity *state*) 5.0 5.0))
+	(incf *paddle-speed* 3.0))
 
       (when (and (< x 0) (< vel-x 0))
 	(decf (game-state-score *state*) 50)
 	(when (< (game-state-score *state*) 0)
 	  (setf (game-state-score *state*) 0))
 	(setf (game-state-running-p *state*) nil)
+	(setf *paddle-speed* 230.0)
+	(setf (game-state-next-points *state*) 10)
+	(setf (game-state-ball-velocity *state*) (make-vec2 :x -200.0 :y 235.0))
 	(setf (game-state-ball-position *state*)
 	      (make-vec2 :x (/ *width* 2) :y (/ *height* 2))))))
 
