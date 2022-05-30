@@ -14,4 +14,4 @@
      (:file "pong"))
     :serial t))
   :serial t
-  :depends-on (:sdl2))
+  :depends-on (:sdl2 :sdl2-ttf))

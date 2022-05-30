@@ -149,6 +149,9 @@
 (defvar *back-wall* (sdl2:make-rect (- *width* *thickness*) 0 *thickness* *height*))
 (defvar *paddle* (sdl2:make-rect *thickness* 0 *thickness* *paddle-height*))
 (defvar *ball* (sdl2:make-rect 0 0 *thickness* *thickness*))
+(defvar *font* nil)
+(defvar *score-texture* nil)
+(defvar *score-rect* nil)
 
 (defun render (renderer)
   (sdl2:set-render-draw-color renderer 0 0 180 0)
@@ -160,16 +163,37 @@
   (sdl2:render-fill-rect renderer *back-wall*)
   (sdl2:render-fill-rect renderer *paddle*)
   (sdl2:render-fill-rect renderer *ball*)
+  (render-score renderer)
 
   (sdl2:render-present renderer))
+
+(defun render-score (renderer)
+  (setf *score-texture*
+	(let* ((surface (sdl2-ttf:render-text-solid
+			 *font*
+			 (format nil "~s" (game-state-score *state*))
+			 255 255 255 0))
+	       (texture (sdl2:create-texture-from-surface renderer surface)))
+	  (sdl2:free-surface surface)
+	  texture))
+  (setf *score-rect* (sdl2:make-rect
+		      (- *width* *thickness* (sdl2:texture-width *score-texture*))
+		      (+ *thickness* 5)
+		      (sdl2:texture-width *score-texture*)
+		      (sdl2:texture-height *score-texture*)))
+    (sdl2:render-copy renderer *score-texture* :source-rect (cffi:null-pointer) :dest-rect *score-rect*))
 
 (defun run-game ()
   (setf *ticks-count* 0)
   (update-paddle 0)
   (update-ball 0)
   (sdl2:with-init (:everything)
+    (sdl2-ttf:init)
+    (setf *font*
+	  (sdl2-ttf:open-font "assets/PROBE_10PX_OTF.otf" 24))
     (sdl2:with-window (win :title "Pong" :w *width* :h *height* :flags '(:shown))
       (sdl2:with-renderer (renderer win :flags '(:accelerated))
+	(render-score renderer)
 	(sdl2:with-event-loop (:method :poll)
 	  (:keyup
 	   (:keysym keysym)
@@ -181,4 +205,10 @@
 	   ()
 	   (update)
 	   (render renderer))
-	  (:quit () t))))))
+	  (:quit
+	   ()
+	   (when (> (sdl2-ttf:was-init) 0)
+	     (sdl2-ttf:close-font *font*)
+	     (sdl2:destroy-texture *score-texture*)
+	     (sdl2-ttf:quit))
+	   t))))))
