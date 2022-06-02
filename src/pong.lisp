@@ -7,6 +7,8 @@
 (defparameter *height* 768)
 (defparameter *ticks-count* 0)
 (defparameter *paddle-speed* 230.0)
+(defparameter *min-ball-y-velocity* 200.0)
+(defparameter *ball-velocity-range* 70.0)
 
 (defstruct vec2
   x y)
@@ -26,7 +28,7 @@
    :score 0
    :next-points 10
    :ball-position (make-vec2 :x (/ *width* 2) :y (/ *height* 2))
-   :ball-velocity (make-vec2 :x -200.0 :y 235.0)
+   :ball-velocity (make-vec2 :x -200.0 :y (+ *min-ball-y-velocity* (random *ball-velocity-range*)))
    :paddle-position (make-vec2 :x *thickness* :y (/ *height* 2))
    :paddle-velocity (make-vec2 :x 0.0 :y 0.0)))
 
@@ -80,6 +82,11 @@
 	(new-y (if (>= (vec2-y vec) 0) (+ (vec2-y vec) y) (- (vec2-y vec) y))))
     (make-vec2 :x new-x :y new-y)))
 
+(defun randomise-y (vec minimum maximum)
+  (let* ((y (+ minimum (random maximum)))
+	 (new-y (if (>= (vec2-y vec) 0) y (* -1 y))))
+    (make-vec2 :x (vec2-x vec) :y new-y)))
+
 (defun update-paddle (delta-time)
   (let* ((delta-pos
 	   (delta
@@ -121,7 +128,10 @@
 	(incf (game-state-next-points *state*) 5)
 	(flip-ball-direction-x)
 	(setf (game-state-ball-velocity *state*)
-	      (speed-up (game-state-ball-velocity *state*) 5.0 5.0))
+	      (randomise-y
+	       (speed-up (game-state-ball-velocity *state*) 7.0 7.0)
+	       *min-ball-y-velocity*
+	       *ball-velocity-range*))
 	(incf *paddle-speed* 3.0))
 
       (when (and (< x 0) (< vel-x 0))
@@ -131,7 +141,9 @@
 	(setf (game-state-running-p *state*) nil)
 	(setf *paddle-speed* 230.0)
 	(setf (game-state-next-points *state*) 10)
-	(setf (game-state-ball-velocity *state*) (make-vec2 :x -200.0 :y 235.0))
+	(setf (game-state-ball-velocity *state*) (make-vec2
+						  :x -200.0
+						  :y (+ *min-ball-y-velocity* (random *ball-velocity-range*))))
 	(setf (game-state-ball-position *state*)
 	      (make-vec2 :x (/ *width* 2) :y (/ *height* 2))))))
 
