@@ -1,2 +1,3 @@
 (defpackage :pong
-  (:use :cl))
+  (:use :cl)
+  (:export run-game))
