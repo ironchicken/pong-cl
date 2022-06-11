@@ -6,9 +6,9 @@
 (defparameter *width* 1024)
 (defparameter *height* 768)
 (defparameter *ticks-count* 0)
-(defparameter *paddle-speed* 230.0)
+(defparameter *paddle-speed* 250.0)
 (defparameter *min-ball-y-velocity* 200.0)
-(defparameter *ball-velocity-range* 70.0)
+(defparameter *ball-velocity-range* 100.0)
 
 (defstruct vec2
   x y)
@@ -132,14 +132,14 @@
 	       (speed-up (game-state-ball-velocity *state*) 7.0 7.0)
 	       *min-ball-y-velocity*
 	       *ball-velocity-range*))
-	(incf *paddle-speed* 3.0))
+	(incf *paddle-speed* 7.0))
 
       (when (and (< x 0) (< vel-x 0))
 	(decf (game-state-score *state*) 50)
 	(when (< (game-state-score *state*) 0)
 	  (setf (game-state-score *state*) 0))
 	(setf (game-state-running-p *state*) nil)
-	(setf *paddle-speed* 230.0)
+	(setf *paddle-speed* 250.0)
 	(setf (game-state-next-points *state*) 10)
 	(setf (game-state-ball-velocity *state*) (make-vec2
 						  :x -200.0
