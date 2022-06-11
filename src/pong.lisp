@@ -162,8 +162,6 @@
 (defvar *paddle* (sdl2:make-rect *thickness* 0 *thickness* *paddle-height*))
 (defvar *ball* (sdl2:make-rect 0 0 *thickness* *thickness*))
 (defvar *font* nil)
-(defvar *score-texture* nil)
-(defvar *score-rect* nil)
 
 (defun render (renderer)
   (sdl2:set-render-draw-color renderer 0 0 180 0)
@@ -180,20 +178,26 @@
   (sdl2:render-present renderer))
 
 (defun render-score (renderer)
-  (setf *score-texture*
-	(let* ((surface (sdl2-ttf:render-text-solid
-			 *font*
-			 (format nil "~s" (game-state-score *state*))
-			 255 255 255 0))
-	       (texture (sdl2:create-texture-from-surface renderer surface)))
-	  (sdl2:free-surface surface)
-	  texture))
-  (setf *score-rect* (sdl2:make-rect
-		      (- *width* *thickness* (sdl2:texture-width *score-texture*))
-		      (+ *thickness* 5)
-		      (sdl2:texture-width *score-texture*)
-		      (sdl2:texture-height *score-texture*)))
-    (sdl2:render-copy renderer *score-texture* :source-rect (cffi:null-pointer) :dest-rect *score-rect*))
+  (let* ((score-texture
+	   (let* ((surface (sdl2-ttf:render-text-solid
+			    *font*
+			    (format nil "~s" (game-state-score *state*))
+			    255 255 255 0))
+		  (texture (sdl2:create-texture-from-surface renderer surface)))
+	     (sdl2:free-surface surface)
+	     texture))
+	 (score-rect
+	   (sdl2:make-rect
+	    (- *width* *thickness* (sdl2:texture-width score-texture))
+	    (+ *thickness* 5)
+	    (sdl2:texture-width score-texture)
+	    (sdl2:texture-height score-texture))))
+    (sdl2:render-copy renderer score-texture :source-rect (cffi:null-pointer) :dest-rect score-rect)
+    ;; These some eventually cause a SB-SYS:MEMORY-FAULT-ERROR condition, probably
+    ;; fixed by https://github.com/Failproofshark/cl-sdl2-ttf/pull/26
+    ;;(sdl2:destroy-texture score-texture)
+    ;;(sdl2:free-rect score-rect)
+    ))
 
 (defun run-game ()
   (setf *ticks-count* 0)
@@ -221,6 +225,5 @@
 	   ()
 	   (when (> (sdl2-ttf:was-init) 0)
 	     (sdl2-ttf:close-font *font*)
-	     (sdl2:destroy-texture *score-texture*)
 	     (sdl2-ttf:quit))
 	   t))))))
